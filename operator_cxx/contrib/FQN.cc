@@ -1,0 +1,62 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+/*!
+ * Copyright (c) 2019 by Contributors
+ * \file FQN.cc
+ * \brief
+ * \author Xiaotao Chen
+*/
+
+#include "./FQN-inl.h"
+
+#include <nnvm/op_attr_types.h>
+
+namespace mxnet {
+namespace op {
+
+template<>
+Operator *CreateOp<cpu>(FQNPara param, int dtype) {
+  Operator* op = nullptr;
+  MSHADOW_REAL_TYPE_SWITCH(dtype, DType, {
+    op = new FQNOp<cpu, DType>(param);
+  });
+  return op;
+}
+
+Operator *FQNProp::CreateOperatorEx(Context ctx, std::vector<TShape> *in_shape,
+                                          std::vector<int> *in_type) const {
+   std::vector<TShape> out_shape, aux_shape;
+   std::vector<int> out_type, aux_type;
+   CHECK(InferType(in_type, &out_type, &aux_type));
+   CHECK(InferShape(in_shape, &out_shape, &aux_shape));
+   DO_BIND_DISPATCH(CreateOp, param_, (*in_type)[0]);
+}
+
+DMLC_REGISTER_PARAMETER(FQNPara);
+
+MXNET_REGISTER_OP_PROPERTY(_contrib_FQN, FQNProp)
+.describe(R"code(perform simulated int8 quatization)code" ADD_FILELINE)
+.add_argument("data", "NDArray-or-Symbol", "Input data to activation function.")
+.add_argument("min", "NDArray-or-Symbol", "min array")
+.add_argument("max", "NDArray-or-Symbol", "max array")
+.add_arguments(FQNPara::__FIELDS__());
+
+}  // namespace op
+}  // namespace mxnet
