@@ -175,7 +175,15 @@ class Quantization_int8Op : public Operator {
                                in_data[Quantization_int8_enum::kData].shape_[1], 1, 1);
       data = in_data[Quantization_int8_enum::kData].get_with_shape<xpu, 4, DType>(dshape, s);
       out = out_data[Quantization_int8_enum::kOut].get_with_shape<xpu, 4, DType>(dshape, s);
-    } else {
+    }
+    else if (in_data[Quantization_int8_enum::kData].ndim() == 3) {
+      Shape<4> dshape = Shape4(in_data[Quantization_int8_enum::kData].shape_[0],
+                               in_data[Quantization_int8_enum::kData].shape_[1], 
+                               in_data[Quantization_int8_enum::kData].shape_[2], 1);
+      data = in_data[Quantization_int8_enum::kData].get_with_shape<xpu, 4, DType>(dshape, s);
+      out = out_data[Quantization_int8_enum::kOut].get_with_shape<xpu, 4, DType>(dshape, s);
+    } 
+    else {
       data = in_data[Quantization_int8_enum::kData].get<xpu, 4, DType>(s);
       out = out_data[Quantization_int8_enum::kOut].get<xpu, 4, DType>(s);
     }
@@ -323,7 +331,18 @@ class Quantization_int8Op : public Operator {
 
       out_data_grad = out_grad[Quantization_int8_enum::kOut].get_with_shape<xpu, 4, DType>(dshape, s);
       data_grad = in_grad[Quantization_int8_enum::kData].get_with_shape<xpu, 4, DType>(dshape, s);
-    } else {
+    }
+    else if (out_grad[Quantization_int8_enum::kOut].ndim() == 3) {
+      Shape<4> dshape = Shape4(out_grad[Quantization_int8_enum::kOut].shape_[0],
+                               out_grad[Quantization_int8_enum::kOut].shape_[1], 
+                               out_grad[Quantization_int8_enum::kOut].shape_[2], 1);
+      data = in_data[Quantization_int8_enum::kData].get_with_shape<xpu, 4, DType>(dshape, s);
+      out = out_data[Quantization_int8_enum::kOut].get_with_shape<xpu, 4, DType>(dshape, s);
+
+      out_data_grad = out_grad[Quantization_int8_enum::kOut].get_with_shape<xpu, 4, DType>(dshape, s);
+      data_grad = in_grad[Quantization_int8_enum::kData].get_with_shape<xpu, 4, DType>(dshape, s);
+    }
+    else {
       data = in_data[Quantization_int8_enum::kData].get<xpu, 4, DType>(s);
       out = out_data[Quantization_int8_enum::kOut].get<xpu, 4, DType>(s);
 
