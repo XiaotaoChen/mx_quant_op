@@ -70,7 +70,14 @@ In our private deep model, the int8 training result can align with result in fp3
 In our practice, the easy way to train model in int8 is finetuning the fp32 model. `base_itn8_lr = base_fp32_lr/2`, `finetune_epoch=2`, `lr_scheduler` is setting to `SineScheduler`, which `lr = base_int8_lr * Sine(curr_iter/total_iters * pi)`
 
 ### how to compile the cxx op into mxnet
-copy those files in `operator_cxx/contrib` into `mxnet_home/operator/contrib`, and compile it.
+due to `quantization_int8` operator requires `maxall_except_dim` function which implemented in `mshadow` by us. so replace the  source `reduceto1d.h`  file with ours.
+
+```shell
+1. copy those files in `operator_cxx/contrib` into `mxnet_home/operator/contrib`
+2. copy reduceto1d.h in `3rdparty/mshadow/mshadow/extension/reduceto1d.h` into `mxnet_home/3rdparty/mshadow/mshadow/extension/reduceto1d.h`
+3. compile your mxnet
+```
+
 
 ## attach quantize node
 We attach quantize node by parsing symbol file of mxnet. It can generate graph with quantization node with your quantization setting. Detail implementation in `utils/graph_optimize.py`.
